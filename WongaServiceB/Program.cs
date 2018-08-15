@@ -8,13 +8,16 @@ namespace WongaServiceB
 {
     public class Program
     {
+        private const string QUEUE_NAME = "myQueue";
+        private const string HOST_NAME = "localhost";
+
         static void Main(string[] args)
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = HOST_NAME };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.QueueDeclare("myQueue", false, false, false, null);
+                channel.QueueDeclare(QUEUE_NAME, false, false, false, null);
 
                 var consumer = new EventingBasicConsumer(channel);
                 // Subscribe to Message Received event
@@ -31,7 +34,7 @@ namespace WongaServiceB
                         Console.WriteLine($"Invalid message: {message}");
                     }
                 };
-                channel.BasicConsume("myQueue", true, consumer);
+                channel.BasicConsume(QUEUE_NAME, true, consumer);
                 Console.ReadLine();
             }
         }
@@ -45,14 +48,14 @@ namespace WongaServiceB
 
 
         /// <summary>
-        /// 
+        /// Extracts name from message if name is valid
         /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
+        /// <param name="message">The message received as string</param>
+        /// <returns>The extracted name as string</returns>
         public static string ExtractName(string message)
         {
             if (!IsValidMessage(message))
-                throw new ArgumentException();
+                throw new ArgumentException(message);
             else
                 return message.Split(',')[1].Trim();
         }
